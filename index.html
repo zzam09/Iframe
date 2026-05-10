@@ -9,17 +9,15 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
-
         body {
             background-color: #000;
             color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
             overflow: hidden;
             height: 100vh;
         }
 
-        .terminal-font { font-family: 'JetBrains Mono', monospace; }
+        .terminal-font { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
 
         /* Portal Overlay */
         #portal-overlay {
@@ -34,106 +32,119 @@
             transition: all 1s cubic-bezier(0.85, 0, 0.15, 1);
         }
 
-        /* The Progress Bar - No more linear transition */
         .progress-rail {
-            width: 280px;
+            width: 240px;
             height: 2px;
-            background: rgba(255,255,255,0.05);
-            margin: 2rem 0;
+            background: rgba(255,255,255,0.1);
+            margin: 2.5rem 0;
             position: relative;
+            border-radius: 10px;
         }
 
         #progress-fill {
             height: 100%;
             width: 0%;
             background: #fff;
-            box-shadow: 0 0 15px rgba(255,255,255,0.5);
-            /* Speed is handled by JS now */
+            box-shadow: 0 0 20px rgba(255,255,255,0.4);
             transition: width 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+            border-radius: 10px;
         }
 
-        /* Log Stream */
         #console-log {
-            height: 100px;
-            width: 280px;
-            font-size: 9px;
-            color: #444;
+            height: 80px;
+            width: 240px;
+            font-size: 10px;
+            color: #555;
             overflow: hidden;
             display: flex;
             flex-direction: column-reverse;
+            font-weight: 500;
         }
 
         .log-entry {
-            margin-bottom: 2px;
-            animation: fadeIn 0.2s ease-out forwards;
+            margin-bottom: 3px;
+            animation: fadeIn 0.3s ease-out forwards;
+            letter-spacing: 0.02em;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
+            from { opacity: 0; transform: translateY(4px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Hide scrollbars */
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="flex flex-col">
 
+    <!-- LOADING OVERLAY -->
     <div id="portal-overlay">
-        <!-- Official Logo -->
         <img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/SpaceX_logo_black.svg" 
-             style="filter: invert(1); width: 200px;" alt="SpaceX">
+             style="filter: invert(1); width: 180px;" alt="SpaceX">
         
         <div class="progress-rail">
             <div id="progress-fill"></div>
         </div>
 
-        <div id="console-log" class="terminal-font uppercase tracking-widest">
+        <div id="console-log" class="uppercase tracking-[0.1em]">
             <!-- JS will inject logs here -->
         </div>
 
-        <div class="terminal-font text-[10px] mt-8 text-zinc-600 animate-pulse">
-            SECURE LINK ESTABLISHED
+        <div class="text-[11px] mt-10 text-zinc-500 font-medium tracking-[0.2em] animate-pulse">
+            ESTABLISHING SECURE CONNECTION
         </div>
     </div>
 
     <!-- MAIN APP INTERFACE -->
-    <header class="h-14 flex items-center justify-center bg-black border-b border-zinc-900 pt-safe">
+    <header class="h-14 flex items-center justify-center bg-black border-b border-white/5 pt-safe">
         <img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/SpaceX_logo_black.svg" 
              style="filter: invert(1); height: 14px;" alt="SpaceX">
     </header>
 
     <main class="flex-1 relative bg-black">
-        <iframe src="https://space-x-portals.vercel.app/pages/user.html?id=001" class="w-full h-full border-none opacity-0 transition-opacity duration-1000" id="main-frame"></iframe>
+        <iframe src="https://space-x-portals.vercel.app/pages/user.html?id=001" 
+                class="w-full h-full border-none opacity-0 transition-opacity duration-1000" 
+                id="main-frame"></iframe>
     </main>
 
-    <nav class="h-20 flex justify-around items-center bg-black border-t border-zinc-900 pb-safe">
-        <button class="flex flex-col items-center gap-1 text-white">
-            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-            <span class="text-[8px] font-bold uppercase tracking-widest">HQ</span>
+    <!-- PREMIUM NAVIGATION -->
+    <nav class="h-20 flex justify-around items-center bg-[#050505] border-t border-white/5 pb-safe px-8">
+        <!-- HQ (Active) -->
+        <button class="relative flex flex-col items-center justify-center w-16 h-full text-white transition-all duration-300">
+            <div class="absolute top-0 w-6 h-[3px] bg-white rounded-b-full shadow-[0_0_15px_rgba(255,255,255,0.4)]"></div>
+            <i data-lucide="layout-dashboard" class="w-6 h-6 mb-1"></i>
+            <span class="text-[9px] font-bold tracking-widest uppercase">HQ</span>
         </button>
-        <button class="flex flex-col items-center gap-1 text-zinc-600">
-            <i data-lucide="orbit" class="w-5 h-5"></i>
-            <span class="text-[8px] font-bold uppercase tracking-widest">Fleet</span>
+
+        <!-- Fleet -->
+        <button onclick="showToast('Fleet')" class="group flex flex-col items-center justify-center w-16 h-full text-zinc-500 hover:text-zinc-200 transition-all">
+            <i data-lucide="orbit" class="w-6 h-6 mb-1 group-active:scale-90 transition-transform"></i>
+            <span class="text-[9px] font-medium tracking-widest uppercase">Fleet</span>
         </button>
-        <button class="flex flex-col items-center gap-1 text-zinc-600">
-            <i data-lucide="shield-check" class="w-5 h-5"></i>
-            <span class="text-[8px] font-bold uppercase tracking-widest">Secure</span>
+
+        <!-- Secure -->
+        <button onclick="showToast('Secure')" class="group flex flex-col items-center justify-center w-16 h-full text-zinc-500 hover:text-zinc-200 transition-all">
+            <i data-lucide="shield-check" class="w-6 h-6 mb-1 group-active:scale-90 transition-transform"></i>
+            <span class="text-[9px] font-medium tracking-widest uppercase">Secure</span>
         </button>
     </nav>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-[10000] w-full max-w-[280px] pointer-events-none px-4"></div>
 
     <script>
         lucide.createIcons();
 
         const logs = [
-            "Initializing kernel...",
-            "Handshake with Falcon-9-Core...",
-            "Receiving telemetry packet 0x442",
-            "Allocating secure buffer...",
-            "Encrypting uplink RSA-4096",
-            "Validating Starlink-Beta-12",
-            "Uplink status: OPTIMAL",
-            "Syncing mission parameters...",
-            "Checking bio-metrics...",
-            "Access granted by HQ",
-            "Finalizing shell..."
+            "Syncing telemetry...",
+            "Authenticating credentials...",
+            "Loading interface assets...",
+            "Checking system status...",
+            "Uplink established...",
+            "Finalizing connection...",
+            "Optimizing dashboard...",
+            "Securing user portal..."
         ];
 
         let currentProgress = 0;
@@ -142,41 +153,62 @@
         const overlay = document.getElementById('portal-overlay');
         const frame = document.getElementById('main-frame');
 
+        // Loading Logic
         function updateLoading() {
-            // Randomly increase progress between 2% and 15%
-            const increment = Math.floor(Math.random() * 15) + 2;
+            const increment = Math.floor(Math.random() * 12) + 3;
             currentProgress += increment;
 
             if (currentProgress > 100) currentProgress = 100;
-            
             fill.style.width = currentProgress + '%';
 
-            // Add a log entry randomly
             if (Math.random() > 0.4) {
                 const log = document.createElement('div');
                 log.className = 'log-entry';
-                log.innerText = `> ${logs[Math.floor(Math.random() * logs.length)]}`;
+                log.innerText = logs[Math.floor(Math.random() * logs.length)];
                 logContainer.prepend(log);
             }
 
             if (currentProgress < 100) {
-                // Random delay between steps (200ms to 1200ms) to look "real"
-                const nextStep = Math.floor(Math.random() * 1000) + 200;
+                const nextStep = Math.floor(Math.random() * 800) + 200;
                 setTimeout(updateLoading, nextStep);
             } else {
-                // Finished
                 setTimeout(launchApp, 800);
             }
         }
 
         function launchApp() {
-            overlay.style.transform = 'scale(1.1)';
+            overlay.style.transform = 'scale(1.05)';
             overlay.style.opacity = '0';
             frame.style.opacity = '1';
             setTimeout(() => overlay.remove(), 1000);
         }
 
-        // Start the fake but realistic loading
+        // Premium Notification Logic
+        function showToast(featureName) {
+            const container = document.getElementById('toast-container');
+            container.innerHTML = ''; // Prevent stacking for a cleaner look
+
+            const toast = document.createElement('div');
+            toast.className = `
+                bg-white/10 border border-white/10 backdrop-blur-2xl 
+                px-6 py-3 rounded-2xl flex flex-col items-center shadow-2xl
+                transform -translate-y-4 opacity-0 transition-all duration-500 ease-out
+            `;
+            
+            toast.innerHTML = `
+                <span class="text-[10px] text-zinc-400 font-bold tracking-[0.2em] uppercase mb-1">Coming Soon</span>
+                <span class="text-sm text-white font-light tracking-wide">${featureName} Early Access</span>
+            `;
+
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.remove('-translate-y-4', 'opacity-0'));
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-2');
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+
         window.addEventListener('load', () => {
             setTimeout(updateLoading, 500);
         });
