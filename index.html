@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>SpaceX Mission Control</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .terminal-font { font-family: 'JetBrains Mono', monospace; }
+
+        /* Portal Overlay */
+        #portal-overlay {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 1s cubic-bezier(0.85, 0, 0.15, 1);
+        }
+
+        /* The Progress Bar - No more linear transition */
+        .progress-rail {
+            width: 280px;
+            height: 2px;
+            background: rgba(255,255,255,0.05);
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        #progress-fill {
+            height: 100%;
+            width: 0%;
+            background: #fff;
+            box-shadow: 0 0 15px rgba(255,255,255,0.5);
+            /* Speed is handled by JS now */
+            transition: width 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        /* Log Stream */
+        #console-log {
+            height: 100px;
+            width: 280px;
+            font-size: 9px;
+            color: #444;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column-reverse;
+        }
+
+        .log-entry {
+            margin-bottom: 2px;
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <div id="portal-overlay">
+        <!-- Official Logo -->
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/SpaceX_logo_black.svg" 
+             style="filter: invert(1); width: 200px;" alt="SpaceX">
+        
+        <div class="progress-rail">
+            <div id="progress-fill"></div>
+        </div>
+
+        <div id="console-log" class="terminal-font uppercase tracking-widest">
+            <!-- JS will inject logs here -->
+        </div>
+
+        <div class="terminal-font text-[10px] mt-8 text-zinc-600 animate-pulse">
+            SECURE LINK ESTABLISHED
+        </div>
+    </div>
+
+    <!-- MAIN APP INTERFACE -->
+    <header class="h-14 flex items-center justify-center bg-black border-b border-zinc-900 pt-safe">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/SpaceX_logo_black.svg" 
+             style="filter: invert(1); height: 14px;" alt="SpaceX">
+    </header>
+
+    <main class="flex-1 relative bg-black">
+        <iframe src="https://space-x-portals.vercel.app/pages/user.html?id=001" class="w-full h-full border-none opacity-0 transition-opacity duration-1000" id="main-frame"></iframe>
+    </main>
+
+    <nav class="h-20 flex justify-around items-center bg-black border-t border-zinc-900 pb-safe">
+        <button class="flex flex-col items-center gap-1 text-white">
+            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+            <span class="text-[8px] font-bold uppercase tracking-widest">HQ</span>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-zinc-600">
+            <i data-lucide="orbit" class="w-5 h-5"></i>
+            <span class="text-[8px] font-bold uppercase tracking-widest">Fleet</span>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-zinc-600">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+            <span class="text-[8px] font-bold uppercase tracking-widest">Secure</span>
+        </button>
+    </nav>
+
+    <script>
+        lucide.createIcons();
+
+        const logs = [
+            "Initializing kernel...",
+            "Handshake with Falcon-9-Core...",
+            "Receiving telemetry packet 0x442",
+            "Allocating secure buffer...",
+            "Encrypting uplink RSA-4096",
+            "Validating Starlink-Beta-12",
+            "Uplink status: OPTIMAL",
+            "Syncing mission parameters...",
+            "Checking bio-metrics...",
+            "Access granted by HQ",
+            "Finalizing shell..."
+        ];
+
+        let currentProgress = 0;
+        const fill = document.getElementById('progress-fill');
+        const logContainer = document.getElementById('console-log');
+        const overlay = document.getElementById('portal-overlay');
+        const frame = document.getElementById('main-frame');
+
+        function updateLoading() {
+            // Randomly increase progress between 2% and 15%
+            const increment = Math.floor(Math.random() * 15) + 2;
+            currentProgress += increment;
+
+            if (currentProgress > 100) currentProgress = 100;
+            
+            fill.style.width = currentProgress + '%';
+
+            // Add a log entry randomly
+            if (Math.random() > 0.4) {
+                const log = document.createElement('div');
+                log.className = 'log-entry';
+                log.innerText = `> ${logs[Math.floor(Math.random() * logs.length)]}`;
+                logContainer.prepend(log);
+            }
+
+            if (currentProgress < 100) {
+                // Random delay between steps (200ms to 1200ms) to look "real"
+                const nextStep = Math.floor(Math.random() * 1000) + 200;
+                setTimeout(updateLoading, nextStep);
+            } else {
+                // Finished
+                setTimeout(launchApp, 800);
+            }
+        }
+
+        function launchApp() {
+            overlay.style.transform = 'scale(1.1)';
+            overlay.style.opacity = '0';
+            frame.style.opacity = '1';
+            setTimeout(() => overlay.remove(), 1000);
+        }
+
+        // Start the fake but realistic loading
+        window.addEventListener('load', () => {
+            setTimeout(updateLoading, 500);
+        });
+    </script>
+</body>
+</html>
